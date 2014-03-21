@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 require 'yaml'
 require 'optparse'
+require 'date'
 require 'nokogiri'
 require 'open-uri'
 require_relative 'app'
@@ -28,25 +29,26 @@ class Scraping
 
   def extract_features(apk_name, page)
     app = App.new(apk_name)
-    app.titile = page.css('div.info-container div.document-title').text
+    app.titile = page.css('div.info-container div.document-title').text.strip
     title_arr = page.css('div.info-container .document-subtitle')
-
-    app.creator = title_arr[0].text
+    
+    app.creator = title_arr[0].text.strip
     app.creator_url = BASE_URL + title_arr[0]['href']
-    app.date_published= title_arr[1].text
-    app.category = title_arr[2].text 
+    date_string = page.css("div[itemprop='datePublished']").text.strip
+    app.date_published = Date.strptime(date_string,"%B %d, %Y")
+    app.category = page.css("span[itemprop='genre']").text.strip
     app.category_url = BASE_URL + title_arr[2]['href']
-    app.ratings_count = page.css('div.reviews-stats span.reviews-num').text
-    app.rating =page.css('div.rating-box div.score-container div.score').text
-    app.description = page.css('div.show-more-content div.id-app-orig-desc').text
+    app.ratings_count = page.css('div.reviews-stats span.reviews-num').text.strip
+    app.rating =page.css('div.rating-box div.score-container div.score').text.strip
+    app.description = page.css('div.show-more-content div.id-app-orig-desc').text.strip
     extended_info = page.css('div.details-section-contents div.meta-info div.content')
-    app.update_date =  extended_info[0].text
+    app.update_date =  extended_info[0].text.strip
 
-    app.install_size_text =  extended_info[1].text
-    app.downloads_count_text = extended_info[2].text
-    app.version =  extended_info[3].text
-    app.operating_systems  =  extended_info[4].text
-    app.content_rating = extended_info[5].text
+    app.install_size_text =  extended_info[1].text.strip
+    app.downloads_count_text = extended_info[2].text.strip
+    app.version =  extended_info[3].text.strip
+    app.operating_systems  =  extended_info[4].text.strip
+    app.content_rating = extended_info[5].text.strip
     contact_details = page.css('div.details-section div.details-section-contents div.meta-info div.content a.dev-link')
     contact_details.each do |type| 
        if (type.text.downcase.include? "website")
@@ -60,7 +62,7 @@ class Scraping
     new_changes_list = page.css('div.details-section-contents div.recent-change')
     changes = []
     new_changes_list.each do |change|
-      changes << change.text
+      changes << change.text.strip
     end
     app.what_is_new = changes unless changes.empty? 
     serialized_app = YAML::dump(app)
