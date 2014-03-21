@@ -1,5 +1,5 @@
 #Scraping the Google Play Store
-A simple example on how to do data scraping in Ruby using [Nokogiri]('http://nokogiri.org/') to extract information from the Google Play Store.
+A simple example on how to do data scraping in Ruby using [Nokogiri](http://nokogiri.org) to extract information from the Google Play Store.
 
 ##Usage
 ```
